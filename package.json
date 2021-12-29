@@ -1,0 +1,13 @@
+{
+  "name": "waff-monorepo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:wvffle/waff.git",
+  "author": "Kasper Seweryn <github@wvffle.net>",
+  "license": "MIT",
+  "workspaces": [
+      "framework", 
+      "example"
+  ],
+  "private": true
+}

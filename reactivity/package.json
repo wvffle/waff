@@ -1,0 +1,30 @@
+{
+  "name": "@waff/reactivity",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/reactivity.umd.cjs",
+  "module": "./dist/reactivity.js",
+  "typings": "./dist/reactivity.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/reactivity.js",
+      "require": "./dist/reactivity.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc  && vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.4",
+    "vite": "^3.1.0",
+    "vite-plugin-dts": "^1.6.1",
+    "vitest": "^0.23.4"
+  }
+}

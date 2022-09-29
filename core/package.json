@@ -1,0 +1,31 @@
+{
+  "name": "@waff/core",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/waff.umd.cjs",
+  "module": "./dist/waff.js",
+  "typings": "./dist/waff.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/waff.js",
+      "require": "./dist/waff.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc  && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.4",
+    "vite": "^3.1.0",
+    "vite-plugin-dts": "^1.6.1"
+  },
+  "dependencies": {
+    "snabbdom": "^3.5.1"
+  }
+}

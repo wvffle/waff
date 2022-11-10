@@ -15,6 +15,7 @@ export default defineConfig({
       entry: 'src/main',
       name: '@waff/reactivity',
       fileName: 'reactivity'
-    }
+    },
+    minify: process.env.NODE_ENV === 'development'
   }
 })

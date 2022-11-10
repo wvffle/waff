@@ -1,22 +1,34 @@
-import { Reactive, watch, computed, ref } from '@waff/reactivity'
+import { Reactive, watch, computed, ref, Ref, watchEffect } from '@waff/reactivity'
 import type { VNode } from 'snabbdom'
 
-import { init, attributesModule, classModule, styleModule, eventListenersModule } from 'snabbdom'
+import { h, init, attributesModule, classModule, styleModule, eventListenersModule } from 'snabbdom'
 import { reactive } from '@waff/reactivity'
 
 export { h as createElement } from 'snabbdom'
 
 interface WaffOptions {
-  root: HTMLElement | null
-  component: Component
+  root: HTMLElement | VNode | null
+  component: ComponentFactoryFn<{}>
 }
 
-interface ComponentContext {
-  props: Reactive<Record<string, unknown>>
+type Props<T extends Record<string, unknown>> = Reactive<T>
+
+interface ComponentContext<T extends Record<string, unknown>> {
+  props?: Props<T>
 }
 
-type ComponentRenderFn = () => VNode
-type Component = (context: ComponentContext) => ComponentRenderFn
+type ComponentFactoryFn<T extends Record<string, unknown>> = (context: ComponentContext<T>) => Promise<ComponentInstance>
+
+interface ComponentInstance {
+  root: Ref<VNode | undefined>
+
+  destroy(): void
+}
+
+interface ComponentDefinition<PropTypes extends Record<string, unknown>, Setup extends Record<string, unknown>> {
+  setup: (context: ComponentContext<PropTypes>) => Promise<Setup>
+  render: (props: Props<PropTypes>, data: Setup) => VNode
+}
 
 export const createApp = (options: WaffOptions) => {
   if (options.root === null) {
@@ -32,42 +44,48 @@ export const createApp = (options: WaffOptions) => {
 
   let { root } = options
   const props = reactive({})
-  const render = options.component({ props })
-
-  patch(root, render())
+  options.component({ props }).then((rootComponent) => {
+    watchEffect(() => {
+      const vnode = rootComponent.root.value
+      root = patch(root, vnode
+        ? vnode
+        : h('!')
+      )
+    })
+  })
 }
 
-const components: Record<string, Component> = {}
+const components: Record<string, ComponentFactoryFn<any>> = {}
 
-interface ComponentDefinition<Props extends Reactive> {
-  props: Props
-  setup: (props: Props) => Promise<Reactive<Record<string, unknown>>>
-  render: () => VNode
-}
-
-export const defineComponent = <T>(name: string, definition: ComponentDefinition<T>) => {
+export const defineComponent = <PropTypes extends Record<string, unknown>>(name: string, definition: ComponentDefinition<PropTypes, {}>) => {
   if (name in components) {
     throw new Error(`Component '${name}' already exists.`)
   }
 
-  const factory: Component = async () => {
-    const data = await definition.setup(definition.props)
+  const factory: ComponentFactoryFn<PropTypes> = async (context) => {
+    const data = await definition.setup(context)
     const root = ref<VNode>()
 
-    const stop = watch(computed(() => [data, definition.props]), () => {
-      root.value = definition.render()
-    }, { immediate: true })
+    const props = context.props ?? reactive({} as PropTypes)
+    const stop = watchEffect(() => {
+      console.log('@', data)
+      root.value = definition.render(props, data)
+    })
 
-    return {
+    const instance: ComponentInstance = {
       destroy: () => stop(),
       root
     }
+
+    return instance
   }
 
   components[name] = factory
   return factory
 }
 
-export const createComponent = (name: string, props) => {
-  return components[name](props)
+export const createComponent = <T extends Reactive | object>(name: string, props: T) => {
+  return components[name]({
+    props
+  })
 }

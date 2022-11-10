@@ -12,7 +12,7 @@ export class Effect {
   #deps = new Set<Set<Effect>>()
   #runner: Function
 
-  constructor (runner: () => void) {
+  constructor (runner: Function) {
     this.#runner = runner
     this.run()
   }
@@ -65,11 +65,8 @@ export const pauseTracking = () => {
 
 export const track = (target: object, key: string | symbol) => {
   if (!shouldTrack || activeEffect === undefined) {
-    console.log('!track', target, key, shouldTrack, activeEffect)
     return
   }
-
-  console.log('track', target, key)
 
   let depsMap = targetMap.get(target)
   if (!depsMap) {
@@ -88,10 +85,8 @@ export const track = (target: object, key: string | symbol) => {
 export const trigger = (target: object, key: string | symbol) => {
   const depsMap = targetMap.get(target)
   if (!depsMap) {
-    console.log('!trigger', target, key)
     return
   }
-  console.log('trigger', target, key)
 
   const deps: Set<Effect>[] = []
   if (depsMap.has(key)) {

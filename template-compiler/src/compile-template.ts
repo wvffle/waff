@@ -3,7 +3,14 @@ import { RootContent, Element } from "hast"
 interface CompilerContext {
   previous?: Element
   parent?: Element
+  isInsideCondition: boolean
+  conditionText: string
 }
+
+const createContext = (): CompilerContext => ({
+  conditionText: '',
+  isInsideCondition: false
+})
 
 const compileText = (content: string) => {
   // TODO: parse expression
@@ -23,12 +30,15 @@ const compileElement = (element: Element, level: number, context: CompilerContex
       switch (attr) {
         case 'w-if':
           condition = `${value} && `
+          context.isInsideCondition = true
           break
         case 'w-else-if':
           condition = `|| ${value} && `
+          context.isInsideCondition = true
           break
         case 'w-else':
           condition = '|| '
+          context.isInsideCondition = true
           break
         default:
           // TODO: Handle custom directives
@@ -42,13 +52,13 @@ const compileElement = (element: Element, level: number, context: CompilerContex
     const childArray = compileTemplate(element.children, level + 1)
     context.parent = undefined
 
-    return `${condition || ', '}createElement('${element.tagName}', ${JSON.stringify(attrs)}, ${childArray})`
+    return `${condition}createElement('${element.tagName}', ${JSON.stringify(attrs)}, ${childArray})`
   } else {
-    return `${condition || ', '}createElement('${element.tagName}', ${JSON.stringify(attrs)})`
+    return `${condition}createElement('${element.tagName}', ${JSON.stringify(attrs)})`
   }
 }
 
-export const compileTemplate = (children: RootContent[], level = 1, context: CompilerContext = {}) => {
+export const compileTemplate = (children: RootContent[], level = 1, context = createContext()) => {
   const result = []
   for (const child of children) {
     switch (child.type) {
@@ -59,10 +69,24 @@ export const compileTemplate = (children: RootContent[], level = 1, context: Com
         }
         break
 
-      case 'element':
-        result.push(compileElement(child, level, context))
+      case 'element': {
+        const text = compileElement(child, level, context)
+
+        if (context.isInsideCondition) {
+          context.conditionText += text
+          context.isInsideCondition = false
+        } else {
+          if (context.conditionText !== '') {
+            result.push(context.conditionText)
+            context.conditionText = ''
+          }
+
+          result.push(text)
+        }
+
         context.previous = child
         break
+      }
 
       default:
         throw new Error(`Unknown type: ${child.type}`)
@@ -70,5 +94,5 @@ export const compileTemplate = (children: RootContent[], level = 1, context: Com
   }
 
   const spacing = '  '.repeat(level)
-  return `[\n${spacing}${result.join(`\n${spacing}`)}\n${spacing.slice(2)}]`
+  return `[\n${spacing}${result.join(`,\n${spacing}`)}\n${spacing.slice(2)}]`
 }

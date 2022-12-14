@@ -8,7 +8,13 @@ let a = 8
 </script>
 
 <template>
+    <h1>Awesome counnter</h1>
+
     <button @click="counter -= 1">--</button>
-    <div>{{ counter }}</div>
+    <span>{{ counter }}</span>
     <button @click="++counter">++</button>
+
+    <p w-if="counter > 0">YAY</p>
+    <p w-else-if="counter < 0">NAY</p>
+    <p w-else>MEH</p>
 </template>

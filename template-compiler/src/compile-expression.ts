@@ -4,11 +4,15 @@ export const compileExpression = (content: string, fileName = 'file.ts') => {
   const transformer: ts.TransformerFactory<ts.SourceFile> = context => {
     const { factory } = context
 
-    const createGetter = (expression: ts.Expression) => factory.createCallExpression(
-      factory.createIdentifier("$unwrap"),
-      undefined,
-      [expression]
+    const createGetter = (expression: ts.Expression) => factory.createPropertyAccessExpression(
+      expression,
+      factory.createIdentifier('value')
     )
+    // const createGetter = (expression: ts.Expression) => factory.createCallExpression(
+    //   factory.createIdentifier("$unwrap"),
+    //   undefined,
+    //   [expression]
+    // )
 
     return sourceFile => {
       const visitor = (node: ts.Node): ts.Node => {
@@ -34,7 +38,12 @@ export const compileExpression = (content: string, fileName = 'file.ts') => {
           }
 
           // Comparisons, math operations
-          if (ts.isBinaryExpression(node.parent) && node.parent.operatorToken.getText() !== '=') {
+          if (ts.isBinaryExpression(node.parent)) {
+            return createGetter(node)
+          }
+
+          // Pre/post increment/decrement
+          if (ts.isPrefixUnaryExpression(node.parent) || ts.isPostfixUnaryExpression(node.parent)) {
             return createGetter(node)
           }
 

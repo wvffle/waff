@@ -2,6 +2,10 @@ import { fromHtml } from 'hast-util-from-html'
 import { Element, Text } from 'hast'
 import { compileScript } from './compile-script'
 import { compileTemplate } from './compile-template'
+import { pascalCase } from 'pascal-case'
+
+const getName = (name: string) => pascalCase(name.replace(/\.waff$/, ''))
+
 
 export const compile = (content: string, fileName = 'component.waff') => {
   const { children } = fromHtml(content, { fragment: true })
@@ -22,16 +26,24 @@ export const compile = (content: string, fileName = 'component.waff') => {
   }
 
   const [{ value: scriptSource = '' }] = script?.children as Text[] ?? [{ value : '' }]
-  const setupContent = compileScript(scriptSource, fileName)
+  const { setupText, returns, imports, props } = compileScript(scriptSource, fileName)
 
-  const templateContent = template
-    ? compileTemplate(template.children)
+  const render = template
+    ? compileTemplate(template.children, fileName, 4)
     : ''
 
-  return {
-    script,
-    setupContent,
-    template,
-    templateContent
+  const name = getName(fileName)
+  return `import { defineComponent as $defineComponent, createElement as $createElement, unwrap as $unwrap } from '@waff/core'
+${imports.join('\n')}
+let $name = '${name}';
+export default $defineComponent($name, {
+  setup ($props) {\n${setupText}\n  },
+  render ($props, $data) {
+    ${props.length > 0 ? `const { ${props.join(', ')} } = $props;` : ''}
+    {
+      const { ${Object.keys(returns).join(', ')} } = $data;
+      return ${render}
+    }
   }
+})`
 }

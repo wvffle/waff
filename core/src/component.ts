@@ -20,7 +20,7 @@ const componentOptions: Record<string, DefineComponentOptions<PropsOrData<any>, 
 // TODO: Allow passing only Props
 export const defineComponent = <Data, Props = {}>(name: string, options: DefineComponentOptions<Props, Data>) => {
   componentOptions[name] = options as DefineComponentOptions<PropsOrData<Props>, PropsOrData<Data>>
-  return (props = {} as Props) => createComponent('Root', props)
+  return (props = {} as Props) => createComponent(name, props)
 }
 
 export const createComponent = async <Props extends PropsOrData<Props>>(name: string, props = {} as Props): Promise<Component<Props>> => {

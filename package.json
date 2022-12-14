@@ -8,6 +8,8 @@
     "core",
     "reactivity",
     "template-compiler",
+    "vite",
+    "slides",
     "example"
   ]
 }

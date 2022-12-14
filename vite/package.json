@@ -1,0 +1,28 @@
+{
+  "name": "@waff/vite",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/vite.umd.cjs",
+  "module": "./dist/vite.js",
+  "typings": "./dist/vite.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/vite.js",
+      "require": "./dist/vite.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "NODE_ENV=development vite build --watch",
+    "build": "tsc  && vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4",
+    "vite": "^4.0.1"
+  }
+}

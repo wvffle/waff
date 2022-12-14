@@ -1,5 +1,4 @@
 /// <reference types="vitest" />
-
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
@@ -13,12 +12,12 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/main',
-      name: '@waff/template-compiler',
-      fileName: 'template-compiler'
+      name: '@waff/vite',
+      fileName: 'vite'
     },
     minify: process.env.NODE_ENV === 'development',
     rollupOptions: {
-      external: ['typescript', 'hast-util-from-html', 'pascal-case']
+      external: ['@waff/template-compiler']
     }
   }
 })

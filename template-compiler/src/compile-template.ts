@@ -1,30 +1,41 @@
 import { RootContent, Element } from "hast"
+import { compileExpression } from "./compile-expression"
+import { escape } from './utils'
 
 interface CompilerContext {
   previous?: Element
   parent?: Element
   isInsideCondition: boolean
   conditionText: string
+  fileName: string,
+  isChild: boolean
 }
 
-const createContext = (): CompilerContext => ({
+export const createContext = (): CompilerContext => ({
+  fileName: '',
   conditionText: '',
-  isInsideCondition: false
+  isInsideCondition: false,
+  isChild: false
 })
 
-const compileText = (content: string) => {
-  // TODO: parse expression
-  return JSON.stringify(content.trim().replace(/{{\s*(.+?)\s*}}/g, 'EXPR<$1>')) + ','
+export const compileText = (content: string, context: CompilerContext) => {
+  return '`' + escape(content.trim().replace(/{{\s*(.+?)\s*}}/g, (_, expression) => {
+    return '${' + compileExpression(expression, context.fileName).replace(/;?\n?$/, '') + '}'
+  })) + '`,'
 }
 
-const compileElement = (element: Element, level: number, context: CompilerContext): string => {
+export const compileElement = (element: Element, level: number, context: CompilerContext): string => {
   const attrs = element.properties ?? {}
 
   let condition = ''
   for (const attr in attrs) {
+    if (attr[0] === ':') {
+      delete attrs[attr]
+      // TODO: Prop passing
+    }
+
     if (/^w-\w+/.test(attr)) {
-      // TODO: parse expression
-      const value = attrs[attr]
+      const value = compileExpression(attrs[attr] as string, context.fileName)
       delete attrs[attr]
 
       switch (attr) {
@@ -49,22 +60,29 @@ const compileElement = (element: Element, level: number, context: CompilerContex
   if (element.children.length) {
     context.previous = undefined
     context.parent = element
-    const childArray = compileTemplate(element.children, level + 1)
+
+    const { isChild } = context
+    context.isChild = true
+    const childArray = compileTemplate(element.children, context.fileName, level + 1, context)
+    context.isChild = isChild
+
     context.parent = undefined
 
-    return `${condition}createElement('${element.tagName}', ${JSON.stringify(attrs)}, ${childArray})`
+    return `${condition}$createElement('${element.tagName}', ${JSON.stringify(attrs)}, ${childArray})`
   } else {
-    return `${condition}createElement('${element.tagName}', ${JSON.stringify(attrs)})`
+    return `${condition}$createElement('${element.tagName}', ${JSON.stringify(attrs)})`
   }
 }
 
-export const compileTemplate = (children: RootContent[], level = 1, context = createContext()) => {
+export const compileTemplate = (children: RootContent[], fileName: string, level = 1, context = createContext()) => {
+  context.fileName = fileName
+
   const result = []
   for (const child of children) {
     switch (child.type) {
       case 'text':
         if (!/^\s+$/.test(child.value)) {
-          result.push(compileText(child.value))
+          result.push(compileText(child.value, context))
           context.previous = undefined
         }
         break
@@ -94,5 +112,11 @@ export const compileTemplate = (children: RootContent[], level = 1, context = cr
   }
 
   const spacing = '  '.repeat(level)
-  return `[\n${spacing}${result.join(`,\n${spacing}`)}\n${spacing.slice(2)}]`
+  if (context.isChild) {
+    return `[\n${spacing}${result.join(`,\n${spacing}`)}\n${spacing.slice(2)}]`
+  }
+
+  return result.length === 1 && result[0].startsWith('$createElement(')
+    ? result[0]
+    : `$createElement('div', {}, [\n${spacing}${result.join(`,\n${spacing}`)}\n${spacing.slice(2)}])`
 }

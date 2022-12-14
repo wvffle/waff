@@ -28,6 +28,10 @@
     "vitest": "^0.23.4"
   },
   "dependencies": {
-    "hast-util-from-html": "^1.0.0"
+    "hast-util-from-html": "^1.0.0",
+    "pascal-case": "^3.1.2"
+  },
+  "peerDependencies": {
+    "typescript": "^4.9.4"
   }
 }

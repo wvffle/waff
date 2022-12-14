@@ -33,15 +33,15 @@ export const compile = (content: string, fileName = 'component.waff') => {
     : ''
 
   const name = getName(fileName)
-  return `import { defineComponent as $defineComponent, createElement as $createElement } from '@waff/core'
+  return `import { defineComponent as $defineComponent, createElement as $createElement, toRefs as $toRefs } from '@waff/core'
 ${imports.join('\n')}
 let $name = '${name}';
 export default $defineComponent($name, {
   setup ($props) {\n${setupText}\n  },
   render ($props, $data) {
-    ${props.length > 0 ? `const { ${props.join(', ')} } = $props;` : ''}
+    ${props.length > 0 ? `const { ${props.join(', ')} } = $toRefs($props);` : ''}
     {
-      const { ${Object.keys(returns).join(', ')} } = $data;
+      const { ${Object.keys(returns).join(', ')} } = $toRefs($data);
       return ${render}
     }
   }

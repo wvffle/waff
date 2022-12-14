@@ -27,3 +27,25 @@ export const toRaw = <T>(target: MaybeRef<T>): T => {
 
   return target
 }
+
+export const toRefs = <T extends object>(target: T): Record<keyof T, Ref<T[keyof T]>> => {
+  const refs = Object.create(null)
+
+  for (const key in target) {
+    refs[key] = {
+      get [IS_REF] (): true {
+        return true
+      },
+
+      get value () {
+        return target[key]
+      },
+
+      set value (value) {
+        target[key] = value
+      }
+    }
+  }
+
+  return refs
+}

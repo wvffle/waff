@@ -1,14 +1,9 @@
 <script>
-import { ref } from '@waff/core'
-
-const props = defineProps<{ a: number }>()
-
-let counter = ref(0)
-let a = 8
+let counter = 0
 </script>
 
 <template>
-    <h1>Awesome counnter</h1>
+    <h1>Awesome counter</h1>
 
     <button @click="counter -= 1">--</button>
     <span>{{ counter }}</span>

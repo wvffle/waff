@@ -119,12 +119,20 @@ export const createReactive = <T extends object | Array<K>, K>(target: T, option
   })
 }
 
+const cache = new WeakMap<object, Reactive>()
 export const reactive = <T extends object>(target: T, shallow = false): Reactive<T> => {
   if (isReactive(target)) {
     return target
   }
 
-  return createReactive(target, {
+  if (cache.has(target)) {
+    return cache.get(target) as Reactive<T>
+  }
+
+  const result = createReactive(target, {
     shallow
   }) as Reactive<T>
+
+  cache.set(target, result)
+  return result
 }

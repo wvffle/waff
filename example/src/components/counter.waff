@@ -1,5 +1,12 @@
 <script>
-let counter = 0
+import { ref, watch } from '@waff/core'
+
+const counter = ref(0)
+const items = ref([])
+
+watch(counter, (value) => {
+    items.value = [...Array(Math.abs(value)).keys()]
+})
 </script>
 
 <template>
@@ -12,4 +19,8 @@ let counter = 0
     <p w-if="counter > 0">YAY</p>
     <p w-else-if="counter < 0">NAY</p>
     <p w-else>MEH</p>
+
+    <div w-for="n in items">
+        I am item #{{ n + 1 }}
+    </div>
 </template>

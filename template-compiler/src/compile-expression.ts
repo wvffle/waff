@@ -8,11 +8,6 @@ export const compileExpression = (content: string, fileName = 'file.ts') => {
       expression,
       factory.createIdentifier('value')
     )
-    // const createGetter = (expression: ts.Expression) => factory.createCallExpression(
-    //   factory.createIdentifier("$unwrap"),
-    //   undefined,
-    //   [expression]
-    // )
 
     return sourceFile => {
       const visitor = (node: ts.Node): ts.Node => {

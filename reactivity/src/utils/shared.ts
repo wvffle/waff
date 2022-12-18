@@ -38,7 +38,10 @@ export const toRefs = <T extends object>(target: T): Record<keyof T, Ref<T[keyof
       },
 
       get value () {
-        return target[key]
+        return isRef(target[key])
+          ? (target[key] as Ref<T[Extract<keyof T, string>]>).value
+          : target[key]
+
       },
 
       set value (value) {

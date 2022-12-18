@@ -24,9 +24,35 @@ export const compileText = (content: string, context: CompilerContext) => {
   })) + '`,'
 }
 
+export const compileAttr = (attr: string, value: string, context: CompilerContext) => {
+  switch (attr) {
+    case 'w-for': {
+      const [variable, ...exprParts] = value.split(' in ')
+      const expr = exprParts.join(' in ')
+      return {
+        value: compileExpression(expr, context.fileName),
+        forVarName: variable
+      }
+    }
+
+    default:
+      return {
+        value: compileExpression(value, context.fileName)
+      }
+  }
+}
+
 export const compileElement = (element: Element, level: number, context: CompilerContext): string => {
   const attrs = element.properties ?? {}
   const events: Record<string, string> = {}
+
+  const forContext = {
+    isFor: false,
+    expression: '',
+    variableName: 'iter',
+    prefix: '',
+    suffix: ''
+  }
 
   let condition = ''
   for (const attr in attrs) {
@@ -41,25 +67,30 @@ export const compileElement = (element: Element, level: number, context: Compile
     }
 
     if (/^w-\w+/.test(attr)) {
-      const value = compileExpression(attrs[attr] as string, context.fileName)
+      const attrData = compileAttr(attr, attrs[attr] as string, context)
       delete attrs[attr]
 
       switch (attr) {
         case 'w-if':
-          condition = `${value} && `
+          condition = `${attrData.value} && `
           context.isInsideCondition = true
           break
         case 'w-else-if':
           if (!context.isInsideCondition) {
             throw new Error(`${attr} has to be directly after an element with w-if or w-else-if attribute`)
           }
-          condition = ` || ${value} && `
+          condition = ` || ${attrData.value} && `
           break
         case 'w-else':
           if (!context.isInsideCondition) {
             throw new Error(`${attr} has to be directly after an element with w-if or w-else-if attribute`)
           }
           condition = ' || '
+          break
+        case 'w-for':
+          forContext.isFor = true
+          forContext.variableName = attrData.forVarName ?? forContext.variableName
+          forContext.expression = attrData.value
           break
         default:
           // TODO: Handle custom directives
@@ -77,6 +108,18 @@ export const compileElement = (element: Element, level: number, context: Compile
     attrsString = `{"on":{${compiledEvents.join(',')}}${Object.keys(attrs).length ? ',' : ''}${attrsString.slice(1)}`
   }
 
+  if (condition === '') {
+    context.isInsideCondition = false
+  } else if (forContext.isFor) {
+    throw new Error('cannot use w-for with w-if, w-else-if and w-else')
+  }
+
+  if (forContext.isFor) {
+    forContext.prefix = `...${forContext.expression}.map($forItem => { const ${forContext.variableName} = { value: $forItem }; return `
+    forContext.suffix = ' })'
+  }
+
+
   if (element.children.length) {
     context.previous = undefined
     context.parent = element
@@ -92,9 +135,9 @@ export const compileElement = (element: Element, level: number, context: Compile
 
     context.parent = undefined
 
-    return `${condition}$createElement('${element.tagName}', ${attrsString}, ${childArray})`
+    return `${forContext.prefix}${condition}$createElement('${element.tagName}', ${attrsString}, ${childArray})${forContext.suffix}`
   } else {
-    return `${condition}$createElement('${element.tagName}', ${attrsString})`
+    return `${forContext.prefix}${condition}$createElement('${element.tagName}', ${attrsString})${forContext.suffix}`
   }
 }
 

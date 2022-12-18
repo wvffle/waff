@@ -191,6 +191,9 @@ export const compileTemplate = (children: RootContent[], fileName: string, level
         break
       }
 
+      // Ignore comments
+      case 'comment': break
+
       default:
         throw new Error(`Unknown type: ${child.type}`)
     }

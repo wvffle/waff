@@ -23,4 +23,8 @@ watch(counter, (value) => {
     <div w-for="n in items">
         I am item #{{ n + 1 }}
     </div>
+
+    <!-- TODO: Nested components -->
+    <!-- TODO: :style, :class and generic data binding -->
+    <!-- TODO: Component props -->
 </template>

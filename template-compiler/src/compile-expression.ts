@@ -60,6 +60,9 @@ export const compileExpression = (content: string, fileName = 'file.ts') => {
 
   const { outputText } = ts.transpileModule(content, {
     fileName,
+    compilerOptions: {
+      target: ts.ScriptTarget.ESNext,
+    },
     transformers: {
       before: [transformer],
     }

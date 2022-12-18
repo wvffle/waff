@@ -1,5 +1,6 @@
 <script>
 import { ref, watch } from '@waff/core'
+import DynamicList from './dynamic-list.waff'
 
 const counter = ref(0)
 const items = ref([])
@@ -20,11 +21,8 @@ watch(counter, (value) => {
     <p w-else-if="counter < 0">NAY</p>
     <p w-else>MEH</p>
 
-    <div w-for="n in items">
-        I am item #{{ n + 1 }}
-    </div>
+    <dynamic-list :prop="counter"></dynamic-list>
 
-    <!-- TODO: Nested components -->
     <!-- TODO: :style, :class and generic data binding -->
     <!-- TODO: Component props -->
 </template>

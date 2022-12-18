@@ -1,14 +1,19 @@
 import type { Reactive } from "@waff/reactivity"
 import type { VNode } from "snabbdom"
 
-import { reactive, watchEffect } from "@waff/reactivity"
+import { reactive, ref, watchEffect } from "@waff/reactivity"
 import { patch } from "./vdom"
+import { createElement } from "./main"
 
 export type PropsOrData<T> = Record<keyof T, any>
 
 export interface DefineComponentOptions<Props extends PropsOrData<Props>, Data extends PropsOrData<Data>> {
   setup(props: Reactive<Props>): Data | Promise<Data>
-  render(props: Reactive<Props>, data: Reactive<Data>): VNode
+  render(props: Reactive<Props>, data: Reactive<Data>, context: ComponentContext): VNode
+}
+
+export interface ComponentContext<Props = {}> {
+  createInnerComponent: (id: number, componentConstructor: ReturnType<typeof defineComponent>, props: Props) => VNode
 }
 
 export interface Component<Props> {
@@ -29,9 +34,33 @@ export const createComponent = async <Props extends PropsOrData<Props>>(name: st
   const reactiveProps = reactive(props)
   const data = reactive(await options.setup(reactiveProps), true)
 
+  const componentInstances = Object.create(null)
+
+  const forceUpdate = ref(false)
+
   let root: VNode | undefined
   watchEffect(() => {
-    const vnode = options.render(reactiveProps, data)
+    // NOTE: Track force updates
+    if (forceUpdate.value) forceUpdate.value = false
+
+    const vnode = options.render(reactiveProps, data, {
+      createInnerComponent: (id, componentConstructor, props): VNode => {
+        if (id in componentInstances) return componentInstances[id].root
+
+        componentInstances[id] = {
+          root: createElement('!'),
+          initialize: () => componentConstructor(props)
+            .then(({ root }) => {
+              componentInstances[id].root.value = root
+              forceUpdate.value = true
+            })
+            .catch(err => console.error('Cannot create component: ', err))
+        }
+
+        componentInstances[id].initialize()
+        return componentInstances[id].root
+      }
+    })
 
     if (!root) {
       root = vnode

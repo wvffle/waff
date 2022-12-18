@@ -1,6 +1,7 @@
 import { RootContent, Element } from "hast"
 import { compileExpression } from "./compile-expression"
 import { escape } from './utils'
+import { pascalCase } from 'pascal-case'
 
 interface CompilerContext {
   previous?: Element
@@ -174,8 +175,12 @@ export const compileTemplate = (children: RootContent[], fileName: string, level
         break
 
       case 'element': {
-        const text = compileElement(child, level, context)
+        const isComponent = child.tagName.includes('-')
+        const text = isComponent
+          ? `typeof $data.${pascalCase(child.tagName)} === 'function'\n${'  '.repeat(level + 1)}? $ctx.createInnerComponent(${Math.random()}, $data.${pascalCase(child.tagName)}, {/* TODO: Pass props */}).value\n${'  '.repeat(level + 1)}: ${compileElement(child, level + 1, context)}`
+          : compileElement(child, level, context)
 
+        // NOTE: w-if stuff
         if (context.isInsideCondition) {
           context.conditionText += text
         } else {

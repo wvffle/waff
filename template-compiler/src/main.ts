@@ -38,7 +38,7 @@ ${imports.join('\n')}
 let $name = '${name}';
 export default $defineComponent($name, {
   setup ($props) {\n${setupText}\n  },
-  render ($props, $data) {
+  render ($props, $data, $ctx) {
     ${props.length > 0 ? `const { ${props.join(', ')} } = $toRefs($props);` : ''}
     {
       const { ${Object.keys(returns).join(', ')} } = $toRefs($data);

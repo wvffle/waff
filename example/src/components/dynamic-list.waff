@@ -1,10 +1,10 @@
 <script>
 defineProps<{ count: number }>()
-const Array = window.Array
+const { Array, Math } = window
 </script>
 
 <template>
-    <div w-for="n in [...Array(count).keys()]">
+    <div w-for="n in [...Array(Math.abs(count)).keys()]">
         I am item #{{ n + 1 }}
     </div>
 </template>

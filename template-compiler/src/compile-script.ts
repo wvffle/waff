@@ -83,9 +83,22 @@ export const compileScript = (content: string, fileName: string) => {
 
             const visitor = (node: ts.Node): ts.Node => {
               if (ts.isVariableDeclaration(node)) {
-                const name = node.name?.getText()
-                if (name && name[0] !== '$') {
-                  returns[name] = type
+                if (ts.isIdentifier(node.name)) {
+                  const name = node.name.getText()
+                  if (name[0] !== '$') {
+                    returns[name] = type
+                  }
+                }
+
+                if (ts.isObjectBindingPattern(node.name)) {
+                  for (const element of node.name.elements) {
+                    if (ts.isIdentifier(element.name)) {
+                      const name = element.name.getText()
+                      if (name[0] !== '$') {
+                        returns[name] = type
+                      }
+                    }
+                  }
                 }
 
                 // Handle defineProps assignment

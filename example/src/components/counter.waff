@@ -21,7 +21,7 @@ watch(counter, (value) => {
     <p w-else-if="counter < 0">NAY</p>
     <p w-else>MEH</p>
 
-    <dynamic-list :prop="counter"></dynamic-list>
+    <dynamic-list :count="counter"></dynamic-list>
 
     <!-- TODO: :style, :class and generic data binding -->
     <!-- TODO: Component props -->

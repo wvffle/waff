@@ -1,13 +1,5 @@
 <script>
-import { watchEffect } from '@waff/core'
-// defineProps<{ count: number }>()
-const props = defineProps<{ prop: number }>()
-
-watchEffect(() => {
-    console.log(props.prop)
-})
-
-const count = 6
+defineProps<{ count: number }>()
 const Array = window.Array
 </script>
 

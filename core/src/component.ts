@@ -12,7 +12,7 @@ export interface DefineComponentOptions<Props extends PropsOrData<Props>, Data e
   render(props: Reactive<Props>, data: Reactive<Data>, context: ComponentContext): VNode
 }
 
-export interface ComponentContext<Props = {}> {
+export interface ComponentContext<Props = Record<string, any>> {
   createInnerComponent: (id: number, componentConstructor: ReturnType<typeof defineComponent>, props: Props) => VNode
 }
 
@@ -45,13 +45,21 @@ export const createComponent = async <Props extends PropsOrData<Props>>(name: st
 
     const vnode = options.render(reactiveProps, data, {
       createInnerComponent: (id, componentConstructor, props): VNode => {
-        if (id in componentInstances) return componentInstances[id].root
+        if (id in componentInstances) {
+          for (const prop in props) {
+            componentInstances[id].props[prop] = props[prop]
+          }
+
+          return componentInstances[id].root
+        }
 
         componentInstances[id] = {
           root: createElement('!'),
           initialize: () => componentConstructor(props)
-            .then(({ root }) => {
-              componentInstances[id].root.value = root
+            .then(({ root, props }) => {
+              componentInstances[id].root = root
+              componentInstances[id].props = props
+
               forceUpdate.value = true
             })
             .catch(err => console.error('Cannot create component: ', err))

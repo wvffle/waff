@@ -25,7 +25,7 @@ export const compileText = (content: string, context: CompilerContext) => {
   })) + '`,'
 }
 
-export const compileAttr = (attr: string, value: string, context: CompilerContext) => {
+export const compileDirective = (attr: string, value: string, context: CompilerContext) => {
   switch (attr) {
     case 'w-for': {
       const [variable, ...exprParts] = value.split(' in ')
@@ -43,10 +43,49 @@ export const compileAttr = (attr: string, value: string, context: CompilerContex
   }
 }
 
-export const compileElement = (element: Element, level: number, context: CompilerContext): string => {
+export const compileAttrs = (element: Element, context: CompilerContext) => {
   const attrs = element.properties ?? {}
   const events: Record<string, string> = {}
+  const dynamicAttrs: Record<string, string> = {}
 
+  for (const attr in attrs) {
+    if (attr[0] === ':') {
+      dynamicAttrs[attr.slice(1)] = compileExpression(attrs[attr] as string, context.fileName)
+      delete attrs[attr]
+    }
+
+    if (attr[0] === '@') {
+      events[attr.slice(1)] = compileExpression(attrs[attr] as string, context.fileName)
+      delete attrs[attr]
+    }
+
+    if (/^w-\w+/.test(attr)) {
+      delete attrs[attr]
+    }
+  }
+
+  let attrsString = JSON.stringify(attrs)
+
+  const compiledEvents = Object.entries(events).map(([event, handler]) => {
+    return `"${event}":()=>{${handler}}`
+  })
+
+  if (compiledEvents.length) {
+    attrsString = `{"on":{${compiledEvents.join(',')}}${attrsString.length > 2 ? ',' : ''}${attrsString.slice(1)}`
+  }
+
+  const compiledDynamicAttrs = Object.entries(dynamicAttrs).map(([event, handler]) => {
+    return `"${event}":${handler}`
+  })
+
+  if (compiledDynamicAttrs.length) {
+    attrsString = `{${compiledDynamicAttrs.join(',')}${attrsString.length > 2 ? ',' : ''}${attrsString.slice(1)}`
+  }
+
+  return attrsString
+}
+
+export const compileElement = (element: Element, level: number, context: CompilerContext): string => {
   const forContext = {
     isFor: false,
     expression: '',
@@ -56,20 +95,12 @@ export const compileElement = (element: Element, level: number, context: Compile
   }
 
   let condition = ''
+
+    // NOTE: Directives
+  const attrs = element.properties ?? {}
   for (const attr in attrs) {
-    if (attr[0] === ':') {
-      delete attrs[attr]
-      // TODO: Prop passing
-    }
-
-    if (attr[0] === '@') {
-      events[attr.slice(1)] = compileExpression(attrs[attr] as string, context.fileName)
-      delete attrs[attr]
-    }
-
     if (/^w-\w+/.test(attr)) {
-      const attrData = compileAttr(attr, attrs[attr] as string, context)
-      delete attrs[attr]
+      const attrData = compileDirective(attr, attrs[attr] as string, context)
 
       switch (attr) {
         case 'w-if':
@@ -99,16 +130,6 @@ export const compileElement = (element: Element, level: number, context: Compile
     }
   }
 
-  let attrsString = JSON.stringify(attrs)
-
-  const compiledEvents = Object.entries(events).map(([event, handler]) => {
-    return `"${event}":()=>{${handler}}`
-  })
-
-  if (compiledEvents.length) {
-    attrsString = `{"on":{${compiledEvents.join(',')}}${Object.keys(attrs).length ? ',' : ''}${attrsString.slice(1)}`
-  }
-
   if (condition === '') {
     context.isInsideCondition = false
   } else if (forContext.isFor) {
@@ -120,7 +141,7 @@ export const compileElement = (element: Element, level: number, context: Compile
     forContext.suffix = ' })'
   }
 
-
+  const attrsString = compileAttrs(element, context)
   if (element.children.length) {
     context.previous = undefined
     context.parent = element
@@ -177,7 +198,7 @@ export const compileTemplate = (children: RootContent[], fileName: string, level
       case 'element': {
         const isComponent = child.tagName.includes('-')
         const text = isComponent
-          ? `typeof $data.${pascalCase(child.tagName)} === 'function'\n${'  '.repeat(level + 1)}? $ctx.createInnerComponent(${Math.random()}, $data.${pascalCase(child.tagName)}, {/* TODO: Pass props */}).value\n${'  '.repeat(level + 1)}: ${compileElement(child, level + 1, context)}`
+          ? `typeof $data.${pascalCase(child.tagName)} === 'function'\n${'  '.repeat(level + 1)}? $ctx.createInnerComponent(${Math.random()}, $data.${pascalCase(child.tagName)}, ${compileAttrs(child, context)})\n${'  '.repeat(level + 1)}: ${compileElement(child, level + 1, context)}`
           : compileElement(child, level, context)
 
         // NOTE: w-if stuff

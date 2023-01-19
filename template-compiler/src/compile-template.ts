@@ -124,8 +124,6 @@ export const compileElement = (element: Element, level: number, context: Compile
           forContext.variableName = attrData.forVarName ?? forContext.variableName
           forContext.expression = attrData.value
           break
-        default:
-          // TODO: Handle custom directives
       }
     }
   }

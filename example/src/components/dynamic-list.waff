@@ -5,6 +5,6 @@ const { Array, Math } = window
 
 <template>
     <div w-for="n in [...Array(Math.abs(count)).keys()]">
-        I am item #{{ n + 1 }}
+        Element: {{ n + 1 }}
     </div>
 </template>

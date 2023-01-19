@@ -3,26 +3,20 @@ import { ref, watch } from '@waff/core'
 import DynamicList from './dynamic-list.waff'
 
 const counter = ref(0)
-const items = ref([])
-
-watch(counter, (value) => {
-    items.value = [...Array(Math.abs(value)).keys()]
-})
 </script>
 
 <template>
-    <h1>Awesome counter</h1>
+    <h1>Przyklad licznika</h1>
 
     <button @click="counter -= 1">--</button>
     <span>{{ counter }}</span>
     <button @click="++counter">++</button>
 
-    <p w-if="counter > 0">YAY</p>
-    <p w-else-if="counter < 0">NAY</p>
-    <p w-else>MEH</p>
+    <p w-if="counter > 0">licznik jest wiekszy od 0 (w-if)</p>
+    <p w-else-if="counter < 0">licznik jest mniejszy od 0 (w-else-if)</p>
+    <p w-else>licznik jest rowny 0 (w-else)</p>
 
     <dynamic-list :count="counter"></dynamic-list>
 
-    <!-- TODO: :style, :class and generic data binding -->
-    <!-- TODO: Component props -->
+    <!-- TODO: :style, :class -->
 </template>

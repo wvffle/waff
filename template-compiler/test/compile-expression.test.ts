@@ -25,7 +25,7 @@ describe('getters', () => {
 describe('string templates', () => {
   it('should substitute variable', () => {
     const content = compileExpression('`a${a}a`')
-    expect(content).to.eq('"a".concat(a.value, "a")')
+    expect(content).to.eq('`a${a.value}a`')
   })
 })
 
@@ -101,12 +101,12 @@ describe('comparison and math', () => {
 describe('integration', () => {
   it('should not modify const variable', () => {
     const content = compileExpression('const a = 8')
-    expect(content).to.eq('var a = 8')
+    expect(content).to.eq('const a = 8')
   })
 
   it('should not modify let variable', () => {
     const content = compileExpression('let a = 8')
-    expect(content).to.eq('var a = 8')
+    expect(content).to.eq('let a = 8')
   })
 
   it('should not modify var variable', () => {

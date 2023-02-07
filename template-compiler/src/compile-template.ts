@@ -43,7 +43,7 @@ export const compileDirective = (attr: string, value: string, context: CompilerC
   }
 }
 
-export const compileAttrs = (element: Element, context: CompilerContext) => {
+export const compileAttrs = (element: Element, isInnerComponent: boolean, context: CompilerContext) => {
   const attrs = element.properties ?? {}
   const events: Record<string, string> = {}
   const dynamicAttrs: Record<string, string> = {}
@@ -79,7 +79,9 @@ export const compileAttrs = (element: Element, context: CompilerContext) => {
   })
 
   if (compiledDynamicAttrs.length) {
-    attrsString = `{${compiledDynamicAttrs.join(',')}${attrsString.length > 2 ? ',' : ''}${attrsString.slice(1)}`
+    attrsString = isInnerComponent
+      ? `{${compiledDynamicAttrs.join(',')}${attrsString.length > 2 ? ',' : ''}${attrsString.slice(1)}`
+      : `{props:{${compiledDynamicAttrs.join(',')}}${attrsString.length > 2 ? ',' : ''}${attrsString.slice(1)}`
   }
 
   return attrsString
@@ -145,7 +147,7 @@ export const compileElement = (element: Element, level: number, context: Compile
     forContext.suffix = ' })'
   }
 
-  const attrsString = compileAttrs(element, context)
+  const attrsString = compileAttrs(element, false, context)
   if (element.children.length) {
     context.previous = undefined
     context.parent = element
@@ -202,7 +204,7 @@ export const compileTemplate = (children: RootContent[], fileName: string, level
       case 'element': {
         const isComponent = child.tagName.includes('-')
         const text = isComponent
-          ? `typeof $data.${pascalCase(child.tagName)} === 'function'\n${'  '.repeat(level + 1)}? $ctx.createInnerComponent(${Math.random()}, $data.${pascalCase(child.tagName)}, ${compileAttrs(child, context)})\n${'  '.repeat(level + 1)}: ${compileElement(child, level + 1, context)}`
+          ? `typeof $data.${pascalCase(child.tagName)} === 'function'\n${'  '.repeat(level + 1)}? $ctx.createInnerComponent(${Math.random()}, $data.${pascalCase(child.tagName)}, ${compileAttrs(child, true, context)})\n${'  '.repeat(level + 1)}: ${compileElement(child, level + 1, context)}`
           : compileElement(child, level, context)
 
         // NOTE: w-if stuff

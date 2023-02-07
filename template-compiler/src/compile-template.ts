@@ -135,7 +135,13 @@ export const compileElement = (element: Element, level: number, context: Compile
   }
 
   if (forContext.isFor) {
-    forContext.prefix = `...${forContext.expression}.map($forItem => { const ${forContext.variableName} = { value: $forItem }; return `
+    const fakeValue = forContext.variableName[0] === '['
+      ? '$forItem.map($item => ({ value: $item }))'
+      : forContext.variableName[0] === '{'
+        ? 'new Proxy($forItem, { get: ($t, $k) => ({ value: $t[$k] }) })'
+        : '{ value: $forItem }'
+
+    forContext.prefix = `...${forContext.expression}.map($forItem => { const ${forContext.variableName} = ${fakeValue}; return `
     forContext.suffix = ' })'
   }
 

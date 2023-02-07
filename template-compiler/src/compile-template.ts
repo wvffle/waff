@@ -47,35 +47,52 @@ export const compileAttrs = (element: Element, isInnerComponent: boolean, contex
   const attrs = element.properties ?? {}
   const events: Record<string, string> = {}
   const dynamicAttrs: Record<string, string> = {}
+  let dynamicClass = ''
+  let classes = ''
 
   for (const attr in attrs) {
     if (attr === 'className') {
-      const classes = attrs[attr] as string[]
-
-      attrs['class'] = classes.reduce((acc, name) => {
-        acc[name] = true
-        return acc
-      }, Object.create(null))
+      classes = JSON.stringify(
+        (attrs[attr] as string[]).reduce((acc, name) => {
+          acc[name] = true
+          return acc
+        }, Object.create(null))
+      )
 
       delete attrs[attr]
+      continue
+    }
+
+    if (attr === ':class') {
+      // NOTE: Parenthesis are used to convert Block into an Expression during compile time
+      dynamicClass = compileExpression(`(${attrs[attr]})`, context.fileName)
+      delete attrs[attr]
+      continue
     }
 
     if (attr[0] === ':') {
       dynamicAttrs[attr.slice(1)] = compileExpression(attrs[attr] as string, context.fileName)
       delete attrs[attr]
+      continue
     }
 
     if (attr[0] === '@') {
       events[attr.slice(1)] = compileExpression(attrs[attr] as string, context.fileName)
       delete attrs[attr]
+      continue
     }
 
     if (/^w-\w+/.test(attr)) {
       delete attrs[attr]
+      continue
     }
   }
 
+
   let attrsString = JSON.stringify(attrs)
+
+  if (classes === '') classes = '{}'
+  if (dynamicClass !== '') classes = `${classes.slice(0, -1)}, ...${dynamicClass}}`
 
   const compiledEvents = Object.entries(events).map(([event, handler]) => {
     return `"${event}":($event)=>{${handler}}`
@@ -89,13 +106,19 @@ export const compileAttrs = (element: Element, isInnerComponent: boolean, contex
     return `"${event}":${handler}`
   })
 
-  if (compiledDynamicAttrs.length) {
-    attrsString = isInnerComponent
-      ? `{${compiledDynamicAttrs.join(',')}${attrsString.length > 2 ? ',' : ''}${attrsString.slice(1)}`
-      : `{props:{${compiledDynamicAttrs.join(',')}}${attrsString.length > 2 ? ',' : ''}${attrsString.slice(1)}`
-  }
-
-  return attrsString
+  console.log(classes)
+  return [
+    '{',
+    compiledDynamicAttrs.length
+      ? isInnerComponent
+        ? compiledDynamicAttrs.join(',') + ','
+        : `props:{${compiledDynamicAttrs.join(',')}},`
+      : '',
+    classes.length > 2
+      ? `"class":${classes},`
+      : '',
+    attrsString.slice(1)
+  ].join('')
 }
 
 export const compileElement = (element: Element, level: number, context: CompilerContext): string => {

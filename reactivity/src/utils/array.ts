@@ -24,7 +24,7 @@ const createArrayModifier = (key: keyof typeof ARRAY_MODIFIERS) => function (thi
   const fn = toRaw(this as any)[key]
 
   pauseTracking()
-  const result = fn.apply(this, ...args)
+  const result = fn.apply(this, args)
   resumeTracking()
   return result
 }

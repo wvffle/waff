@@ -67,7 +67,7 @@ export const compileAttrs = (element: Element, context: CompilerContext) => {
   let attrsString = JSON.stringify(attrs)
 
   const compiledEvents = Object.entries(events).map(([event, handler]) => {
-    return `"${event}":()=>{${handler}}`
+    return `"${event}":($event)=>{${handler}}`
   })
 
   if (compiledEvents.length) {

@@ -4,10 +4,14 @@ export const compileExpression = (content: string, fileName = 'file.ts') => {
   const transformer: ts.TransformerFactory<ts.SourceFile> = context => {
     const { factory } = context
 
-    const createGetter = (expression: ts.Expression) => factory.createPropertyAccessExpression(
-      expression,
-      factory.createIdentifier('value')
-    )
+    const createGetter = (expression: ts.Expression) => {
+      if (expression.getText()[0] === '$') return expression
+
+      return factory.createPropertyAccessExpression(
+        expression,
+        factory.createIdentifier('value')
+      )
+    }
 
     return sourceFile => {
       const visitor = (node: ts.Node): ts.Node => {

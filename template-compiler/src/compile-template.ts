@@ -49,6 +49,17 @@ export const compileAttrs = (element: Element, isInnerComponent: boolean, contex
   const dynamicAttrs: Record<string, string> = {}
 
   for (const attr in attrs) {
+    if (attr === 'className') {
+      const classes = attrs[attr] as string[]
+
+      attrs['class'] = classes.reduce((acc, name) => {
+        acc[name] = true
+        return acc
+      }, Object.create(null))
+
+      delete attrs[attr]
+    }
+
     if (attr[0] === ':') {
       dynamicAttrs[attr.slice(1)] = compileExpression(attrs[attr] as string, context.fileName)
       delete attrs[attr]

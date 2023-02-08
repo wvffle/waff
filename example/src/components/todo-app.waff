@@ -1,0 +1,35 @@
+<script>
+import { reactive, ref, watchEffect } from '@waff/core'
+import TodoRenderer from './todo-renderer.waff'
+
+type Todo = { text: string, done: boolean }
+
+const todos = reactive([] as Todo[])
+const todo = ref('test todo')
+
+const addTodo = () => {
+  todos.push({ text: todo.value, done: false })
+  todo.value = ''
+}
+</script>
+
+<template>
+  <main class="flex justify-center items-center h-screen bg-green-200">
+    <div class="max-w-md w-full shadow-md bg-white px-8 pb-16 pt-8 rounded-md">
+      <h1 class="text-xl pb-4 text-gray-800">
+        Things to do
+        <div class="text-gray-500 text-sm">
+          Number of todos: {{ todos.length }}
+        </div>
+      </h1>
+      <div class="border border-gray-200 flex rounded focus-within:shadow overflow-hidden mb-8">
+        <input @input="todo = $event.target.value" :value="todo" type="text" class="w-full px-4 py-2">
+        <button @click="addTodo()" class="bg-green-500 hover:bg-green-400">
+          <div class="i-clarity-add-text-line text-2xl text-white px-6"></div>
+        </button>
+      </div>
+
+      <todo-renderer :todos="todos" />
+    </div>
+  </main>
+</template>

@@ -106,7 +106,6 @@ export const compileAttrs = (element: Element, isInnerComponent: boolean, contex
     return `"${event}":${handler}`
   })
 
-  console.log(classes)
   return [
     '{',
     compiledDynamicAttrs.length

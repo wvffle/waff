@@ -9,7 +9,15 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@iconify-json/bi": "^1.1.14",
+    "@iconify-json/clarity": "^1.1.7",
+    "@unocss/preset-icons": "^0.49.4",
+    "@unocss/preset-wind": "^0.49.4",
     "typescript": "^4.9.4",
     "vite": "^3.1.4"
+  },
+  "dependencies": {
+    "@unocss/reset": "^0.49.4",
+    "unocss": "^0.49.4"
   }
 }

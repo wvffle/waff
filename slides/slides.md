@@ -8,7 +8,7 @@ drawings:
 css: unocss
 ---
 
-# Projekt i implementacja javascriptowego frameworku frontendowego
+# Projekt i implementacja JavaScriptowego frameworku frontendowego
 
 <div class="abs-bl m-6 gap-2 text-left">
   Kasper Seweryn
@@ -21,13 +21,13 @@ layout: cover
 
 # Cel pracy
 
-Celem pracy jest zaprojektowanie i stworzenie frameworku frontendowego opartego na jezyku programowania JavaScript tak aby posiadal wsparcie dla komponentow bazujacych na plikach SFC przy pomocy prekompilacji, poprawnie aktualizowal strukture HTML oraz posiadal zaawansowany system reaktywnosci.
+Celem pracy jest zaprojektowanie i stworzenie frameworku frontendowego opartego na języku programowania JavaScript tak aby posiadał wsparcie dla komponentów bazujących na plikach SFC przy pomocy prekompilacji, poprawnie aktualizował strukturę HTML oraz posiadał zaawansowany system reaktywności.
 
 ---
 layout: cover
 ---
 
-# Uzyte technologie
+# Użyte technologie
 
 <div class="flex gap-2 justify-center">
   <img src="/assets/vite.png" class="h-40" />
@@ -38,15 +38,15 @@ layout: cover
 
 ---
 
-# Z jakich komponentow sklada sie framework?
+# Z jakich komponentów składa sie framework?
 
-Framework frontendowy sklada sie z 5 glownych komponentow
+Framework frontendowy składa sie z 5 głównych komponentów
 
-- 🤹 **System reaktywnosci** - odpowiadaja za aktualizacje HTMLa gdy stan w JSie sie zmieni
-- 📝 **Logika komponentow** - odpowiada za poprawne renderowanie komponentow
-- 🔌 **Pliki SFC** - odpowiadaja za definicje komponentow
-- 🛠 **Prekompilator komponentow** - odpowiada za kompilacje plikow SFC
-- 🎨 **Wtyczka do narzedzi do budowania** - odpowiada za wsparcie plikow SFC w projektach
+- 🤹 **System reaktywności** - odpowiadają za aktualizacje HTMLa gdy stan w JSie sie zmieni
+- 📝 **Logika komponentów** - odpowiada za poprawne renderowanie komponentów
+- 🔌 **Pliki SFC** - odpowiadają za definicje komponentów
+- 🛠 **Prekompilator komponentów** - odpowiada za kompilacje plików SFC
+- 🎨 **Wtyczka do narzędzi do budowania** - odpowiada za wsparcie plików SFC w projektach
 
 ---
 layout: cover
@@ -57,7 +57,7 @@ layout: cover
 ---
 
 # System reaktywnosci
-W momencie odczytywania wartosci reaktywnej zmiennej oznaczamy ja jako sledzona przez dana funkcje, a w momencie zapisu wywolujemy wszystkie funkcje ktore sledza ta zmienna.
+W momencie odczytywania wartości reaktywnej zmiennej oznaczamy ja jako śledzona przez dana funkcje, a w momencie zapisu wywołujemy wszystkie funkcje które śledzą ta zmienną.
 
 ```ts {1|3-5|7|4,7|8|9|all}
 const counter = ref(0)
@@ -74,13 +74,13 @@ counter.value = 9 // 9
 layout: cover
 ---
 
-# Logika komponentow
+# Logika komponentów
 
 ---
 
-# Logika komponentow
+# Logika komponentów
 
-Po aktualizacji stanu nalezy zaktualizowac HTML
+Po aktualizacji stanu należy zaktualizować HTML
 
 ```html
 <button id="dec">--</button>
@@ -95,15 +95,15 @@ document.querySelector('#inc').addEventListener('click', () => ++counter.value)
 document.querySelector('#dec').addEventListener('click', () => --counter.value)
 
 watch(counter, (value) => {
-  document.querySelector('#dec').textContent = value
+  document.querySelector('#count').textContent = value
 })
 ```
 
 ---
 
-# Logika komponentow
+# Logika komponentów
 
-Co zrobic aby ulatwic uzytkownikowi pisanie wlasnych komponentow? Jak moglyby wygladac struktura HTML takich komponentow?
+Co zrobić aby ułatwić użytkownikowi pisanie własnych komponentów? Jak mogłaby wyglądać struktura HTML takich komponentów?
 
 ```html
 <button @click="--counter.value">--</button>
@@ -115,7 +115,7 @@ Co zrobic aby ulatwic uzytkownikowi pisanie wlasnych komponentow? Jak moglyby wy
 ---
 
 # Logika komponentow
-Jak wygladalaby javascriptowa reprezentacja komponentu?
+Jak wyglądałaby JavasScriptowa reprezentacja komponentu?
 
 ```ts {1,20|2-4|5,19|6,10|7|9|6-10|14-18|11-13|all}
 const Counter = defineComponent('Counter', {
@@ -142,7 +142,7 @@ const Counter = defineComponent('Counter', {
 ---
 
 # Logika komponentow
-Dzialanie defineComponent()
+Działanie defineComponent()
 
 ```ts {1,8|2|4,7|5|6|all}
 const defineComponent = (_, options) => () => {
@@ -163,7 +163,7 @@ layout: cover
 ---
 
 # Pliki SFC
-Pelna reprezentacja komponentu jest znacznie prostsza niz pisanie wszystkiego recznie.
+Pełna reprezentacja komponentu jest znacznie prostsza niz pisanie wszystkiego ręcznie.
 
 ```vue {all|1-3|6-8}
 <script>
@@ -180,11 +180,11 @@ const counter = ref(0)
 ---
 
 # Pliki SFC
-Mozna uproscic go jeszcze bardziej rezygnujac z recznego zarzadzania reaktywnoscia i oddelegowujac to frameworkowi.
+Można uprościć go jeszcze bardziej rezygnując z ręcznego zarządzania reaktywnością w strukturze HTML i oddelegować to frameworkowi.
 
 ```vue {2,6-8|all}
 <script>
-let counter = 0
+const counter = ref(0)
 </script>
 
 <template>
@@ -198,21 +198,21 @@ let counter = 0
 layout: cover
 ---
 
-# Prekompilator plikow SFC
+# Prekompilator plików SFC
 ---
 
-# Prekompilator plikow SFC
+# Prekompilator plików SFC
 
 <table>
   <tr>
-    <th>Przed prekompilacja</th>
+    <th>Przed prekompilacją</th>
     <th>Po prekompilacji</th>
   </tr>
   <tr>
     <td>
 ```vue
 <script>
-let counter = 0
+const counter = ref(0)
 </script>
 
 <template>
@@ -225,25 +225,28 @@ let counter = 0
     <td>
 
 ```ts
-const Counter = defineComponent('Counter', {
+const Counter = $defineComponent('Counter', {
   setup: () => ({
     counter: ref(0)
   }),
-  render: (_, data) => createElement('div', {}, [
-    createElement('button', {
-      on: { click: () => data.counter.value-- }
-    }, [
-      '--'
-    ]),
-    createElement('div', {}, [
-      data.counter.value
+  render: (_, $data) => {
+    const { counter } = $toRefs($data)
+    return $createElement('div', {}, [
+      $createElement('button', {
+        on: { click: () => counter.value-- }
+      }, [
+        '--'
+      ]),
+      $createElement('div', {}, [
+        counter.value
+      ])
+      $createElement('button', {
+        on: { click: () => counter.value++ }
+      }, [
+        '++'
+      ])
     ])
-    createElement('button', {
-      on: { click: () => data.counter.value++ }
-    }, [
-      '++'
-    ])
-  ])
+  }
 })
 ```
     </td>
@@ -254,11 +257,11 @@ const Counter = defineComponent('Counter', {
 layout: cover
 ---
 
-# Wtyczka do narzedzi do budowania
+# Wtyczka do narzędzi do budowania
 
 ---
 
-# Wtyczka do narzedzi do budowania
+# Wtyczka do narzędzi do budowania
 
 <img src="/assets/vite.png" class="h-40 mx-auto" />
 
@@ -275,7 +278,7 @@ createApp({
 ---
 
 # Wtyczka do narzedzi do budowania
-Dzieki wtyczce uzytkownik nie musi meczyc sie z prekompilatorem
+Dzięki wtyczce użytkownik nie musi męczyć sie z ręczną konfiguracją prekompilatora
 
 ```ts
 // vite.config.ts
@@ -299,22 +302,91 @@ layout: cover
 ---
 
 # Demo
+todo-app.waff
 
-```vue {all|12-14}
+```vue {all|3|5|7-8|10-13}
 <script>
-let counter = 0
+import { reactive, ref, watchEffect } from '@waff/core'
+import TodoRenderer from './todo-renderer.waff'
+
+type Todo = { text: string, done: boolean }
+
+const todos = reactive([] as Todo[])
+const todo = ref('test todo')
+
+const addTodo = () => {
+  todos.push({ text: todo.value, done: false })
+  todo.value = ''
+}
+</script>
+```
+---
+
+# Demo
+todo-app.waff
+
+```vue {all|7|11|12|17}
+<template>
+  <main class="flex justify-center items-center h-screen bg-green-200">
+    <div class="max-w-md w-full shadow-md bg-white px-8 pb-16 pt-8 rounded-md">
+      <h1 class="text-xl pb-4 text-gray-800">
+        Things to do
+        <div class="text-gray-500 text-sm">
+          Number of todos: {{ todos.length }}
+        </div>
+      </h1>
+      <div class="border border-gray-200 flex rounded focus-within:shadow overflow-hidden mb-8">
+        <input @input="todo = $event.target.value" :value="todo" type="text" class="w-full px-4 py-2">
+        <button @click="addTodo()" class="bg-green-500 hover:bg-green-400">
+          <div class="i-clarity-add-text-line text-2xl text-white px-6"></div>
+        </button>
+      </div>
+
+      <todo-renderer :todos="todos" />
+    </div>
+  </main>
+</template>
+
+
+```
+---
+
+# Demo
+todo-renderer.waff
+```ts
+<script>
+defineProps<{ todos: Todo[] }>()
+
+const enumerate = <T>(arr: T[]) => Object.entries(arr)
+  .map(([i, v]) => [+i, v]) as [number, T][]
 </script>
 
+```
+---
+
+# Demo
+todo-renderer.waff
+```vue {all|4|5|6|8|9-10|14}
 <template>
-    <h1>Awesome counter</h1>
-
-    <button @click="counter -= 1">--</button>
-    <span>{{ counter }}</span>
-    <button @click="++counter">++</button>
-
-    <p w-if="counter > 0">YAY</p>
-    <p w-else-if="counter < 0">NAY</p>
-    <p w-else>MEH</p>
+  <table class="w-full">
+    <tbody class="divide-y-1">
+      <tr w-for="[i, todo] in enumerate(todos)">
+        <td class="px-4 py-2 text-sm text-gray-400 align-middle">{{ i + 1 }}</td>
+        <td class="px-4 py-2 w-full" :class="{ 'line-through text-gray-400': todo.done }">{{ todo.text }}</td>
+        <td class="px-4 py-2">
+          <button @click="todo.done = !todo.done" class="flex">
+            <div w-if="!todo.done" class="i-bi-circle text-2xl text-gray-400 hover:text-green-400 self-center"></div>
+            <div w-else class="i-bi-check-circle text-2xl hover:text-green-400 text-green-500 self-center"></div>
+          </button>
+        </td>
+        <td class="px-4 py-2">
+          <button @click="todos.splice(i, 1)" class="flex">
+            <div class="i-bi-trash text-2xl hover:text-red-400 text-red-500 self-center"></div>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 ```
@@ -333,7 +405,7 @@ layout: cover
 
 # Testy
 
-Aplikacja posiada 85 testow jednostkowych sprawdzajacych poprawnosc wygenerowanego kodu, jak i reaktywnosci
+Aplikacja posiada 85 testów jednostkowych sprawdzających poprawność wygenerowanego kodu, jak i reaktywności
 
 ---
 layout: cover
@@ -341,7 +413,7 @@ layout: cover
 
 # Podsumowanie
 
-Cel zostal osiagniety w 100%. Framework posiada wsparcie dla komponentow bazujacych na plikach SFC dzieki prekompilacji, poprawnie aktualizuje strukture HTML oraz posiada zaawansowany system reaktywnosci.
+Cel został osiągnięty w 100%. Framework posiada wsparcie dla komponentów bazujących na plikach SFC dzięki prekompilacji, poprawnie aktualizuje strukturę HTML oraz posiada zaawansowany system reaktywności.
 
 ---
 layout: cover
@@ -349,10 +421,11 @@ layout: cover
 
 # Kierunki rozwoju
 
-- **HMR** - Podmienianie zaktualizowanych modulow w czasie rzeczywistym
-- **Router** - Wyswietlanie zdefiniowanych przez uzytkownika stron na bazie adresu URL
-- **SSG** - Generowanie statycznych plikow HTML dla odpowiednich stron
+- **HMR** - Podmienianie zaktualizowanych modułów w czasie rzeczywistym
+- **Router** - Wyświetlanie zdefiniowanych przez użytkownika stron na bazie adresu URL
+- **SSG** - Generowanie statycznych plików HTML dla odpowiednich stron
 - **SSR** - Dynamiczne renderowanie stron po stronie serwera
+- **Wsparcie IDE** - Dodatek do VS Codium dodający kolorowanie składni i pokazujący błędy TS
 
 ---
 layout: center

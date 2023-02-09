@@ -74,43 +74,25 @@ counter.value = 9 // 9
 layout: cover
 ---
 
-# Logika komponentów
+# Pliki SFC
 
 ---
 
-# Logika komponentów
+# Pliki SFC
 
-Po aktualizacji stanu należy zaktualizować HTML
+Jak mogłaby wyglądać struktura komponentów?
 
-```html
-<button id="dec">--</button>
-<div id="count">0</div>
-<button id="inc">++</button>
-```
-
-```ts {none|1|3-5|6-8|all}
+```vue {all|1-3|5,9|6-8|all}
+<script>
 const counter = ref(0)
+</script>
 
-document.querySelector('#inc').addEventListener('click', () => ++counter.value)
-document.querySelector('#dec').addEventListener('click', () => --counter.value)
-
-watch(counter, (value) => {
-  document.querySelector('#count').textContent = value
-})
+<template>
+  <button @click="--counter">--</button>
+  <div>{{ counter }}</div>
+  <button @click="++counter">++</button>
+</template>
 ```
-
----
-
-# Logika komponentów
-
-Co zrobić aby ułatwić użytkownikowi pisanie własnych komponentów? Jak mogłaby wyglądać struktura HTML takich komponentów?
-
-```html
-<button @click="--counter.value">--</button>
-<div>{{ counter.value }}</div>
-<button @click="++counter.value">++</button>
-```
-
 
 ---
 
@@ -154,45 +136,6 @@ const defineComponent = (_, options) => () => {
   })
 }
 ```
----
-layout: cover
----
-
-# Pliki SFC
-
----
-
-# Pliki SFC
-Pełna reprezentacja komponentu jest znacznie prostsza niz pisanie wszystkiego ręcznie.
-
-```vue {all|1-3|6-8}
-<script>
-const counter = ref(0)
-</script>
-
-<template>
-  <button @click="--counter.value">--</button>
-  <div>{{ counter.value }}</div>
-  <button @click="++counter.value">++</button>
-</template>
-```
-
----
-
-# Pliki SFC
-Można uprościć go jeszcze bardziej rezygnując z ręcznego zarządzania reaktywnością w strukturze HTML i oddelegować to frameworkowi.
-
-```vue {2,6-8|all}
-<script>
-const counter = ref(0)
-</script>
-
-<template>
-  <button @click="--counter">--</button>
-  <div>{{ counter }}</div>
-  <button @click="++counter">++</button>
-</template>
-```
 
 ---
 layout: cover
@@ -202,6 +145,7 @@ layout: cover
 ---
 
 # Prekompilator plików SFC
+Plik SFC jest znacznie prostszy niz definiowanie komponentu ręcznie.
 
 <table>
   <tr>
@@ -276,24 +220,6 @@ createApp({
 ```
 
 ---
-
-# Wtyczka do narzedzi do budowania
-Dzięki wtyczce użytkownik nie musi męczyć sie z ręczną konfiguracją prekompilatora
-
-```ts
-// vite.config.ts
-import { defineConfig } from 'vite'
-import waff from '@waff/vite'
-
-export default defineConfig({
-  plugins: [
-    waff()
-  ]
-})
-
-```
-
----
 layout: cover
 ---
 
@@ -327,27 +253,25 @@ todo-app.waff
 
 ```vue {all|7|11|12|17}
 <template>
-  <main class="flex justify-center items-center h-screen bg-green-200">
+  <main class="flex justify-center items-center h-screen bg-[#fa0]">
     <div class="max-w-md w-full shadow-md bg-white px-8 pb-16 pt-8 rounded-md">
       <h1 class="text-xl pb-4 text-gray-800">
         Things to do
         <div class="text-gray-500 text-sm">
-          Number of todos: {{ todos.length }}
+          Number of todos: {{ todoList.length }}
         </div>
       </h1>
       <div class="border border-gray-200 flex rounded focus-within:shadow overflow-hidden mb-8">
         <input @input="todo = $event.target.value" :value="todo" type="text" class="w-full px-4 py-2">
-        <button @click="addTodo()" class="bg-green-500 hover:bg-green-400">
+        <button @click="addTodo()" :disabled="todo === ''" class="bg-green-500 hover:bg-green-400 !disabled:bg-gray-300">
           <div class="i-clarity-add-text-line text-2xl text-white px-6"></div>
         </button>
       </div>
 
-      <todo-renderer :todos="todos" />
+      <todo-renderer :todos="todoList" />
     </div>
   </main>
 </template>
-
-
 ```
 ---
 
@@ -431,4 +355,4 @@ layout: cover
 layout: center
 ---
 
-# Dziekuje za uwage
+# Dziekuję za uwagę
